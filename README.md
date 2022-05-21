@@ -44,3 +44,5 @@ yarn deploy
 
 📱 Open http://localhost:3000 to see the app
 
+Mint some NFTs and finds out if they are happy to stay with you!
+
