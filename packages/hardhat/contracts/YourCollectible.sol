@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
-
+import "hardhat/console.sol";
 import './HexStrings.sol';
 import './ToColor.sol';
 //learn more: https://docs.openzeppelin.com/contracts/3.x/erc721
@@ -27,30 +27,53 @@ contract YourCollectible is ERC721, Ownable {
 
   mapping (uint256 => bytes3) public color;
   mapping (uint256 => uint256) public chubbiness;
+  mapping (uint256 => uint256) public happiness;
 
   uint256 mintDeadline = block.timestamp + 24 hours;
 
   function mintItem()
-      public
+      public payable
       returns (uint256)
   {
+      require(msg.value>=0.0010 ether, "not enough");
       require( block.timestamp < mintDeadline, "DONE MINTING");
       _tokenIds.increment();
 
       uint256 id = _tokenIds.current();
       _mint(msg.sender, id);
 
-      bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
+      bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this), id ));
       color[id] = bytes2(predictableRandom[0]) | ( bytes2(predictableRandom[1]) >> 8 ) | ( bytes3(predictableRandom[2]) >> 16 );
       chubbiness[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
+      happiness[id] = 263-(uint256(uint8(predictableRandom[4]))%90);
+      console.log(happiness[id]);
 
       return id;
   }
 
+  function withdraw() public onlyOwner {
+      require(address(this).balance>0, "got 0");
+
+      payable(msg.sender).transfer(address(this).balance);
+  }
+
+  function getBalance() public view returns(uint){
+    return address(this).balance;
+  }
   function tokenURI(uint256 id) public view override returns (string memory) {
       require(_exists(id), "not exist");
+      string memory humor;
+      if (happiness[id]>=220 && happiness[id]<250)
+        humor = "happy";
+      else if (happiness[id]>=250)
+        humor = "super happy";
+      else if (happiness[id]<220 && happiness[id]>=200)
+        humor = "unhappy";
+      else
+        humor = "really sad";
+    
       string memory name = string(abi.encodePacked('Loogie #',id.toString()));
-      string memory description = string(abi.encodePacked('This Loogie is the color #',color[id].toColor(),' with a chubbiness of ',uint2str(chubbiness[id]),'!!!'));
+      string memory description = string(abi.encodePacked('This Loogie is the color #',color[id].toColor(),' with a chubbiness of ',uint2str(chubbiness[id]),' and it is ',humor,'!!!'));
       string memory image = Base64.encode(bytes(generateSVGofTokenById(id)));
 
       return
@@ -70,6 +93,8 @@ contract YourCollectible is ERC721, Ownable {
                               color[id].toColor(),
                               '"},{"trait_type": "chubbiness", "value": ',
                               uint2str(chubbiness[id]),
+                              '},{"trait_type": "happiness", "value": ',
+                              uint2str(happiness[id]),
                               '}], "owner":"',
                               (uint160(ownerOf(id))).toHexString(20),
                               '", "image": "',
@@ -96,6 +121,14 @@ contract YourCollectible is ERC721, Ownable {
 
   // Visibility is `public` to enable it being called by other contracts for composition.
   function renderTokenById(uint256 id) public view returns (string memory) {
+    uint256 happy;
+    if (happiness[id]>220)
+      happy = happiness[id] + 20;
+    else
+      happy = happiness[id] - 20;
+
+      console.log ("happy: ", happy);
+      console.log ("happiness: ", happiness[id].toString());
     string memory render = string(abi.encodePacked(
       '<g id="eye1">',
           '<ellipse stroke-width="3" ry="29.5" rx="29.5" id="svg_1" cy="154.5" cx="181.5" stroke="#000" fill="#fff"/>',
@@ -107,6 +140,9 @@ contract YourCollectible is ERC721, Ownable {
           '" stroke-width="3" cx="204.5" cy="211.80065" id="svg_5" rx="',
           chubbiness[id].toString(),
           '" ry="51.80065" stroke="#000"/>',
+         // draw a path for the smile
+          '<path d="M ',
+          ((409 - (chubbiness[id])*2) / 2 ).toString(),' 220 C ', (((409 - (chubbiness[id])*2) / 2 )+20).toString(),' ',happiness[id].toString(), ',',(((409 - (chubbiness[id])*2) / 2 )+30).toString(),' ',happy.toString(),', 204.5 220" stroke="black" fill="transparent"/>',
         '</g>',
         '<g id="eye2">',
           '<ellipse stroke-width="3" ry="29.5" rx="29.5" id="svg_2" cy="168.5" cx="209.5" stroke="#000" fill="#fff"/>',

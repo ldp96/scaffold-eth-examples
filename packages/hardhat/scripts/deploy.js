@@ -24,7 +24,7 @@ const main = async () => {
   // deploy the contract with all the artworks forSale
   const yourCollectible = await deploy("YourCollectible"/*,[ bytes32Array ]*/) // <-- add in constructor args like line 19 vvvv
 
-  yourCollectible.transferOwnership("0x34aA3F359A9D614239015126635CE7732c18fDF3") //austingriffith.eth
+  await yourCollectible.transferOwnership("0x28E0E8d05a4c133a8B22210634Cd2CfA012d1b15") //austingriffith.eth
 
   //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   //const secondContract = await deploy("SecondContract")

@@ -5,7 +5,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Alert, Button, Card, Col, Input, List, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import { useUserAddress } from "eth-hooks";
-import { utils } from "ethers";
+import { ethers, utils } from "ethers";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactJson from "react-json-view";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
@@ -28,7 +28,6 @@ import {
   useUserProvider,
 } from "./hooks";
 import { BlockPicker } from 'react-color'
-
 
 const { BufferList } = require("bl");
 // https://www.npmjs.com/package/ipfs-http-client
@@ -58,7 +57,7 @@ const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" }
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -429,14 +428,15 @@ function App(props) {
                 and give you a form to interact with it locally
             */}
 
+              <text>
+              <br/>
+                Mint some NFTs and finds out if they are happy to stay with you!</text> 
+
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              {isSigner?(
                 <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.YourCollectible.mintItem() )
-                }}>MINT</Button>
-              ):(
-                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
-              )}
+                  tx( writeContracts.YourCollectible.mintItem({value: ethers.utils.parseEther("0.0010")}) )
+                }}>MINT for 0.0010</Button>
+              
 
             </div>
 
@@ -535,7 +535,7 @@ function App(props) {
           loadWeb3Modal={loadWeb3Modal}
           logoutOfWeb3Modal={logoutOfWeb3Modal}
           blockExplorer={blockExplorer}
-          isSigner={isSigner}
+          isSigner={true}
         />
         {faucetHint}
       </div>
