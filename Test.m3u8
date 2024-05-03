@@ -1,9 +1,0 @@
-#EXTM3U
-#EXTINF:-1, cam strada
-http://cdp92.ddns.net:8001/3ee1631436eddab3946ac767b54819e7/live/files/low/index.m3u8
-
-#EXTINF:-2, cam entrata
-http://cdp92.ddns.net:8000/c937a880e115be6769a336fd39b11a85/live/files/medium/index.m3u8
-
-#EXTINF:-3, cam cortile
-http://cdp92.ddns.net:8002/2f27fdb5492a151656cf53d9b7e2e66c/live/files/medium/index.m3u8
